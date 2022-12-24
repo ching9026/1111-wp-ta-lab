@@ -1,0 +1,65 @@
+<!-- The UI of this demo is referred to https://codepen.io/brendinventer/pen/NWxBQvG -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.13.1/css/all.css"
+      integrity="sha384-xxzQGERXS00kBmZW/6qxqJPyxW3UR0BPsL4c8ILaIWXva5kFi7TxkIIaMiKtqV1Q"
+      crossorigin="anonymous"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <title>Diary App</title>
+  </head>
+  <body>
+    <header><h1 class="title">Diary App</h1></header>
+
+    <!-- login -->
+    <div class="login">
+      <button class="btn-main" id="login">Login with Google</button>
+    </div>
+
+    <!-- Diary Section -->
+    <div class="container">
+      <div class="logout">
+        <button class="btn-main" id="logout">Log Out</button>
+      </div>
+      <div class="delete-account">
+        <button class="btn-main" id="delete-account">Delete Account</button>
+      </div>
+      <div class="container-column">
+        <div id="entryForm" action="">
+          <label for="entry-title" class="journal-label">Title</label>
+          <input
+            type="text"
+            id="diary-title"
+            class="diary-title"
+            placeholder="title of your diary ✏️"
+          />
+          <label for="entry" class="journal-label">Content</label>
+          <textarea
+            id="diary-content"
+            class="diary-content"
+            placeholder="What's on your mind today? 💭"
+          ></textarea>
+          <button class="btn-main" id="create">Create</button>
+          <button class="btn-main" id="read">Read</button>
+          <button class="btn-main" id="update">Update</button>
+          <button class="btn-main" id="delete">Delete</button>
+        </div>
+      </div>
+    </div>
+    
+    <script type="module" src="script.js"></script>
+  </body>
+</html>

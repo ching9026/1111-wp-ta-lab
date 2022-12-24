@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Video Retrieval</title>
+    <style>
+      body {
+        font-family: "microsoft jhenghei";
+        text-align: center;
+      }
+      #video-link {
+        display: none;
+        margin: 0 auto;
+        width: 560px;
+        height: 315px;
+      }
+      #video-img {
+        height: 100%;
+      }
+    </style>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+      integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      const gasUrl = "https://script.google.com/macros/s/AKfycbxJOe2JKgmMnzFOu2KV6zs8TL0VHDrvXhANQJpeLgMDXCv8wv2TixNiwEsSFB3NKtAR/exec";
+
+      const start = () =>
+        document.getElementById("button").addEventListener("click", retrieve);
+
+      const retrieve = () => {
+        const input = document.getElementById("input").value;
+        console.log("input: ", input);
+
+        $.ajax({
+          url: gasUrl + "?keyword=" + input,
+          type: "GET",
+          //   data: input,
+          contentType: false,
+          processData: false,
+          success: function (response) {
+            console.log(response);
+            showResponse(response);
+          },
+          error: function () {
+            console.log("somethings was wrong.");
+            document.getElementById("message").innerText =
+              "something was wrong.";
+          },
+        });
+      };
+
+      const showResponse = (response) => {
+        if (response.url !== null) {
+          document
+            .getElementById("video-link")
+            .setAttribute("href", response.url);
+          document
+            .getElementById("video-link")
+            .setAttribute("style", "display: block");
+          document
+            .getElementById("video-img")
+            .setAttribute("src", response.img);
+        }
+        document.getElementById("message").innerText = response.message;
+      };
+
+      window.addEventListener("load", start);
+    </script>
+  </head>
+  <body>
+    <h2>YouTube Video Retrieval</h2>
+    <input id="input" type="text" />
+    <button id="button">retrieval</button>
+    <br />
+    <br />
+    <br />
+    <a id="video-link" target="_blank">
+      <img id="video-img" />
+    </a>
+    <h4 id="message"></h4>
+  </body>
+</html>
