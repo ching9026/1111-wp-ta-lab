@@ -1,31 +1,23 @@
-// Import the functions you need from the SDKs you need
-
-// import { initializeApp } from "firebase/app";
-// import {
-//   getAuth,
-//   deleteUser,
-//   signInWithPopup,
-//   GoogleAuthProvider,
-// } from "firebase/auth";
-// import {
-//   getFirestore,
-//   doc,
-//   collection,
-//   setDoc,
-//   getDoc,
-//   getDocs,
-//   updateDoc,
-//   deleteDoc,
-// } from "firebase/firestore";
-
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import {
+  deleteUser,
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  setDoc,
+  updateDoc,
+} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAOhYhcN4qYI-DgAs_E0OIWBV4QRYoSzqg",
   authDomain: "fir-2a4fc.firebaseapp.com",
@@ -33,164 +25,191 @@ const firebaseConfig = {
   storageBucket: "fir-2a4fc.appspot.com",
   messagingSenderId: "1064281565993",
   appId: "1:1064281565993:web:5edc6a75e4221f4124e538",
-  measurementId: "G-V1D0QMT1K1"
+  measurementId: "G-V1D0QMT1K1",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+getAnalytics(app);
 
-// Initialize Firebase
-initializeApp(firebaseConfig);
-
-const auth = getAuth();
+const auth = getAuth(app);
 const providerGoogle = new GoogleAuthProvider();
-const db = getFirestore();
+const db = getFirestore(app);
+
+const setLoggedInUI = (loggedIn) => {
+  document.querySelector(".login").style.display = loggedIn ? "none" : "block";
+  document.querySelector(".container").style.display = loggedIn ? "block" : "none";
+};
+
+const getDiaryInput = () => ({
+  title: document.getElementById("diary-title").value.trim(),
+  content: document.getElementById("diary-content").value,
+});
+
+const clearDiaryInput = () => {
+  document.getElementById("diary-title").value = "";
+  document.getElementById("diary-content").value = "";
+};
+
+const getCurrentUserEmail = () => {
+  const email = auth.currentUser?.email;
+  if (!email) {
+    alert("Please sign in first.");
+    return null;
+  }
+  return email;
+};
 
 const start = () => {
+  setLoggedInUI(Boolean(auth.currentUser));
   document.getElementById("login").addEventListener("click", login);
   document.getElementById("logout").addEventListener("click", logout);
-  document
-    .getElementById("delete-account")
-    .addEventListener("click", deleteAccount);
+  document.getElementById("delete-account").addEventListener("click", deleteAccount);
   document.getElementById("create").addEventListener("click", createContent);
   document.getElementById("read").addEventListener("click", readContent);
   document.getElementById("update").addEventListener("click", updateContent);
   document.getElementById("delete").addEventListener("click", deleteContent);
 };
 
-const login = () => {
-  signInWithPopup(auth, providerGoogle)
-    .then((result) => {
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      // console.log("credential: ", credential);
-      const token = credential.accessToken;
-      // console.log("token: ", token);
-      const user = result.user;
-      console.log("user: ", user);
-      console.log("userEmail: ", user.email);
-      document.querySelector(".login").style.display = "none";
-      document.querySelector(".container").style.display = "block";
-    })
-    .catch((error) => {
-      alert("Something was wrong.");
-      console.log();
-      console.log("error ==================");
-      const errorCode = error.code;
-      console.log("errorCode: ", errorCode);
-      const errorMessage = error.message;
-      console.log("errorMessage: ", errorMessage);
-      const email = error.email;
-      console.log("email: ", email);
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      // console.log("credential: ", credential);
-    });
-};
-
-const logout = () => {
-  auth
-    .signOut()
-    .then(() => {
-      document.querySelector(".container").style.display = "none";
-      document.querySelector(".login").style.display = "block";
-      alert("You've been logged out.");
-    })
-    .catch((error) => {
-      alert("Something was wrong.");
-      console.log("error: ", error);
-    });
-};
-
-const deleteAccount = () => {
-  const user = auth.currentUser;
-  deleteUser(user)
-    .then(() => {
-      document.querySelector(".container").style.display = "none";
-      document.querySelector(".login").style.display = "block";
-      alert("亲 你号没了");
-    })
-    .catch((error) => {
-      alert("Something was wrong.");
-      console.log("error: ", error);
-    });
-};
-
-const createContent = () => {
-  const userEmail = auth.currentUser.email;
-  const diaryTitle = document.getElementById("diary-title").value;
-  const diaryContent = document.getElementById("diary-content").value;
+const login = async () => {
   try {
-    setDoc(doc(db, userEmail, diaryTitle), {
-      timestamp: new Date(Date.now()),
-      title: diaryTitle,
-      content: diaryContent,
-    });
-    alert('Created: "' + diaryTitle + '"');
-    document.getElementById("diary-title").value = "";
-    document.getElementById("diary-content").value = "";
-  } catch (err) {
-    alert("Something was wrong.");
-    console.error("Error: ", err);
+    const result = await signInWithPopup(auth, providerGoogle);
+    console.log("user:", result.user);
+    setLoggedInUI(true);
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Login failed. Please try again.");
   }
 };
 
-const readContent = () => {
-  document.getElementById("diary-content").value = "";
-  const userEmail = auth.currentUser.email;
-  const diaryTitle = document.getElementById("diary-title").value;
+const logout = async () => {
+  try {
+    await signOut(auth);
+    setLoggedInUI(false);
+    alert("You've been logged out.");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    alert("Logout failed. Please try again.");
+  }
+};
 
-  if (diaryTitle === "") {
-    getDocs(collection(db, userEmail)).then((querySnapshot) => {
-      if (querySnapshot.length === 0) {
-        alert("no content yet.");
+const deleteAccount = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please sign in first.");
+    return;
+  }
+
+  try {
+    await deleteUser(user);
+    setLoggedInUI(false);
+    alert("Your account has been deleted.");
+  } catch (error) {
+    console.error("Account deletion failed:", error);
+    alert("Account deletion failed. You may need to sign in again first.");
+  }
+};
+
+const createContent = async () => {
+  const userEmail = getCurrentUserEmail();
+  if (!userEmail) return;
+
+  const { title, content } = getDiaryInput();
+  if (!title) {
+    alert("Please enter a diary title.");
+    return;
+  }
+
+  try {
+    await setDoc(doc(db, userEmail, title), {
+      timestamp: new Date(),
+      title,
+      content,
+    });
+    alert(`Created: "${title}"`);
+    clearDiaryInput();
+  } catch (error) {
+    console.error("Create failed:", error);
+    alert("Unable to create the diary entry.");
+  }
+};
+
+const readContent = async () => {
+  const userEmail = getCurrentUserEmail();
+  if (!userEmail) return;
+
+  document.getElementById("diary-content").value = "";
+  const { title } = getDiaryInput();
+
+  try {
+    if (!title) {
+      const querySnapshot = await getDocs(collection(db, userEmail));
+      if (querySnapshot.empty) {
+        alert("No diary entries yet.");
         return;
       }
-      querySnapshot.forEach((doc) => {
-        console.log(doc.id, doc.data().content);
-        document.getElementById("diary-content").value += doc.id;
-        document.getElementById("diary-content").value += ":\n";
-        document.getElementById("diary-content").value += doc.data().content;
-        document.getElementById("diary-content").value += "\n\n\n";
+
+      const entries = [];
+      querySnapshot.forEach((snapshot) => {
+        entries.push(`${snapshot.id}:\n${snapshot.data().content}`);
       });
-    });
-  } else {
-    getDoc(doc(db, userEmail, diaryTitle)).then((docSnap) => {
-      if (docSnap.exists()) {
-        console.log("diary content: ", docSnap.data());
-        document.getElementById("diary-content").value = docSnap.data().content;
-      } else {
-        alert("no such data.");
-      }
-    });
+      document.getElementById("diary-content").value = entries.join("\n\n");
+      return;
+    }
+
+    const snapshot = await getDoc(doc(db, userEmail, title));
+    if (snapshot.exists()) {
+      document.getElementById("diary-content").value = snapshot.data().content;
+    } else {
+      alert("No diary entry with that title was found.");
+    }
+  } catch (error) {
+    console.error("Read failed:", error);
+    alert("Unable to read diary entries.");
   }
 };
 
-const updateContent = () => {
-  const userEmail = auth.currentUser.email;
-  const diaryTitle = document.getElementById("diary-title").value;
-  const diaryContent = document.getElementById("diary-content").value;
+const updateContent = async () => {
+  const userEmail = getCurrentUserEmail();
+  if (!userEmail) return;
+
+  const { title, content } = getDiaryInput();
+  if (!title) {
+    alert("Please enter the title of the diary entry to update.");
+    return;
+  }
+
   try {
-    updateDoc(doc(db, userEmail, diaryTitle), {
-      timestamp: new Date(Date.now()),
-      title: diaryTitle,
-      content: diaryContent,
+    await updateDoc(doc(db, userEmail, title), {
+      timestamp: new Date(),
+      title,
+      content,
     });
-    alert('Updated: "' + diaryTitle + '"');
-    document.getElementById("diary-title").value = "";
-    document.getElementById("diary-content").value = "";
-  } catch (err) {
-    alert("Something was wrong.");
-    console.error("Error: ", err);
+    alert(`Updated: "${title}"`);
+    clearDiaryInput();
+  } catch (error) {
+    console.error("Update failed:", error);
+    alert("Unable to update the diary entry. Make sure it already exists.");
   }
 };
 
-const deleteContent = () => {
-  const userEmail = auth.currentUser.email;
-  const diaryTitle = document.getElementById("diary-title").value;
-  deleteDoc(doc(db, userEmail, diaryTitle));
-  alert('Deleted: "' + diaryTitle + '"');
-  document.getElementById("diary-title").value = "";
-  document.getElementById("diary-content").value = "";
+const deleteContent = async () => {
+  const userEmail = getCurrentUserEmail();
+  if (!userEmail) return;
+
+  const { title } = getDiaryInput();
+  if (!title) {
+    alert("Please enter the title of the diary entry to delete.");
+    return;
+  }
+
+  try {
+    await deleteDoc(doc(db, userEmail, title));
+    alert(`Deleted: "${title}"`);
+    clearDiaryInput();
+  } catch (error) {
+    console.error("Delete failed:", error);
+    alert("Unable to delete the diary entry.");
+  }
 };
 
 window.addEventListener("load", start);
